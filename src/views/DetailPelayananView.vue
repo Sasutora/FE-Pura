@@ -50,6 +50,8 @@
           alt="QR Code"
           class="img-thumbnail"
         />
+        <button @click="downloadQRCode" class="btn btn-success mt-2">Unduh QR Code</button>
+
         <div class="mt-4">
         <router-link to="/dashboard" class="btn btn-primary">Kembali</router-link>
       </div>
@@ -95,6 +97,39 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const downloadQRCode = async () => {
+  if (!pelayanan.value?.qr_code) {
+    error.value = "QR Code tidak tersedia.";
+    return;
+  }
+
+  try {
+    const qrUrl = `http://localhost:3000/${pelayanan.value.qr_code}`;
+    
+    // Fetch gambar sebagai Blob
+    const response = await fetch(qrUrl);
+    const blob = await response.blob();
+    
+    // Buat URL Object
+    const blobUrl = window.URL.createObjectURL(blob);
+    
+    // Buat link untuk unduh
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `QR_${pelayanan.value.kode}.png`; // Nama file saat diunduh
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    // Bersihkan URL Object setelah unduhan selesai
+    window.URL.revokeObjectURL(blobUrl);
+    document.body.removeChild(link);
+  } catch (err) {
+    error.value = "Gagal mengunduh QR Code.";
+  }
+};
+
 </script>
 
 <style scoped>

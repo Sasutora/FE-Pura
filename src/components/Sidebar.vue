@@ -29,6 +29,8 @@ function logout() {
 .sidebar {
   width: 250px;
   display: flex;
+  position: sticky;
+  top: 0;
 }
 .nav-link {
   padding: 10px;

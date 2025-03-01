@@ -89,6 +89,7 @@
   import { ref, onMounted } from "vue";
   import { useRouter } from "vue-router";
   import axios from "axios";
+  import Swal from "sweetalert2";
   
   const router = useRouter();
   const form = ref({
@@ -110,23 +111,21 @@
   
   onMounted(async () => {
     try {
-        const token = localStorage.getItem("token"); 
-        if (!token) {
-            console.error("Token tidak ditemukan!");
-            return;
-        }
-
-        const response = await axios.get("http://localhost:3000/pelayanan/kantor", {
-            headers: {
-                Authorization: `Bearer ${token}`, 
-            },
-        });
-
+      const token = localStorage.getItem("token");
+      if (!token) {
+        Swal.fire("Error", "Token tidak ditemukan!", "error");
+        return;
+      }
   
-            daftarKantor.value = response.data.content; 
-      
+      const response = await axios.get("http://localhost:3000/pelayanan/kantor", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      daftarKantor.value = response.data.content;
     } catch (error) {
-        console.error("Error saat mengambil daftar kantor:", error);
+      Swal.fire("Error", "Gagal mengambil daftar kantor!", "error");
     }
   });
   
@@ -138,7 +137,7 @@
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("Token tidak ditemukan!");
+        Swal.fire("Error", "Token tidak ditemukan!", "error");
         return;
       }
   
@@ -154,20 +153,39 @@
       });
   
       if (response.data.status === "success") {
-        alert("Registrasi berhasil!");
-        router.push("/dashboard");
+        Swal.fire({
+          title: "Registrasi Berhasil!",
+          text: "Anda akan dialihkan ke dashboard.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          router.push("/dashboard");
+        });
       } else {
-        console.error("Gagal registrasi:", response.data);
+        Swal.fire("Gagal Registrasi", response.data.message || "Terjadi kesalahan!", "error");
       }
     } catch (error) {
-      console.error("Error saat registrasi:", error.message);
+      Swal.fire("Error", "Terjadi kesalahan saat registrasi!", "error");
     }
   };
   
   const kembali = () => {
-    router.push("/dashboard");
+    Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Perubahan yang belum disimpan akan hilang.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, kembali",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push("/dashboard");
+      }
+    });
   };
   </script>
+  
   
   <style scoped>
   .container {
